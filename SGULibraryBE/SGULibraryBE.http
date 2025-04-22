@@ -1,0 +1,5 @@
+@SGULibraryBE_HostAddress = https://localhost:7261
+
+GET {{SGULibraryBE_HostAddress}}/api/accounts
+
+###
