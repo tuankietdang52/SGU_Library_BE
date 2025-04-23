@@ -5,7 +5,7 @@ namespace SGULibraryBE.Utilities
     public static class QueryableExtension
     {
         /// <summary>
-        /// Excute all expression in referenceCollection by using Include method from queryable
+        /// Include all reference from referenceCollection
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="referenceCollection">Collection which hold reference expressions</param>
