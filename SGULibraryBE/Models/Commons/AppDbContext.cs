@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace SGULibraryBE.Models
+namespace SGULibraryBE.Models.Commons
 {
     public class AppDbContext : DbContext
     {

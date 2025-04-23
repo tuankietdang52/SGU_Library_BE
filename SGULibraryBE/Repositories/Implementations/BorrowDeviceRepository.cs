@@ -2,20 +2,20 @@
 using SGULibraryBE.Models;
 using SGULibraryBE.Models.Commons;
 using SGULibraryBE.Utilities;
-using System.Security.Cryptography;
 
 namespace SGULibraryBE.Repositories.Implementations
 {
-    public class AccountRepository : Repository<long, Account>, IAccountRepository
+    public class BorrowDeviceRepository : Repository<long, BorrowDevice>, IBorrowDeviceRepository
     {
-        public AccountRepository(AppDbContext dbContext) : base(dbContext)
+        public BorrowDeviceRepository(AppDbContext dbContext) : base(dbContext)
         {
             References.AddMultiple([
-                e => e.Role!
+                item => item.User!,
+                item => item.Device!
             ]);
         }
 
-        public override async Task<Account?> FindByIdAsync(long id)
+        public override async Task<BorrowDevice?> FindByIdAsync(long id)
         {
             return await _dbSet.IncludeAll(References)
                                .FirstOrDefaultAsync(item => item.Id == id);

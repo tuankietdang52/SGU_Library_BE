@@ -1,4 +1,4 @@
-﻿using SGULibraryBE.Models;
+﻿using SGULibraryBE.Models.Commons;
 
 namespace SGULibraryBE.Repositories
 {

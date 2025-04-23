@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SGULibraryBE.Models;
+using SGULibraryBE.Models.Commons;
 using SGULibraryBE.Utilities;
 
 namespace SGULibraryBE.Repositories.Implementations

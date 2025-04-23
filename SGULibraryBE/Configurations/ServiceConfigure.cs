@@ -1,7 +1,7 @@
 ﻿using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using SGULibraryBE.Exceptions;
-using SGULibraryBE.Models;
+using SGULibraryBE.Models.Commons;
 using SGULibraryBE.Repositories;
 using SGULibraryBE.Repositories.Implementations;
 using SGULibraryBE.Services;
@@ -26,6 +26,8 @@ namespace SGULibraryBE.Configurations
         {
             services.AddScoped<IMapper, Mapper>();
             services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IDeviceService, DeviceService>();
+            services.AddScoped<IBorrowDeviceService, BorrowDeviceService>();
 
             return services;
         }
@@ -33,6 +35,8 @@ namespace SGULibraryBE.Configurations
         public static IServiceCollection RegisterRepositories(this IServiceCollection services)
         {
             services.AddScoped<IAccountRepository, AccountRepository>();
+            services.AddScoped<IDeviceRepository, DeviceRepository>();
+            services.AddScoped<IBorrowDeviceRepository, BorrowDeviceRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;

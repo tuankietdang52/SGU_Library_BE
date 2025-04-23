@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using SGULibraryBE.Models;
+using SGULibraryBE.Models.Commons;
 
 namespace SGULibraryBE.Configurations
 {

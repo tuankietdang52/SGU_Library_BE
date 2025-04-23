@@ -1,20 +1,18 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SGULibraryBE.DTOs.Requests;
-using SGULibraryBE.DTOs.Responses;
 using SGULibraryBE.Services;
 using SGULibraryBE.Utilities;
-using SGULibraryBE.Utilities.ResultHandler;
 
 namespace SGULibraryBE.Controllers
 {
-    [Route("api/accounts")]
+    [Route("api/borrows")]
     [ApiController]
-    public class AccountController : ControllerBase
+    public class BorrowDeviceController : ControllerBase
     {
-        private readonly IAccountService _service;
+        private readonly IBorrowDeviceService _service;
 
-        public AccountController(IAccountService service)
+        public BorrowDeviceController(IBorrowDeviceService service)
         {
             _service = service;
         }
@@ -34,14 +32,14 @@ namespace SGULibraryBE.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] AccountRequest request)
+        public async Task<IActionResult> Create([FromBody] BorrowDeviceRequest request)
         {
             var response = await _service.Add(request);
             return this.Response(response);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(long id, [FromBody] AccountRequest request)
+        public async Task<IActionResult> Update(long id, [FromBody] BorrowDeviceRequest request)
         {
             var response = await _service.Update(id, request);
             return this.Response(response);

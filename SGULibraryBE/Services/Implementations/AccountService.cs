@@ -1,8 +1,10 @@
 ﻿using Mapster;
 using SGULibraryBE.DTOs.Requests;
 using SGULibraryBE.DTOs.Responses;
+using SGULibraryBE.DTOs.Validation;
 using SGULibraryBE.Models;
 using SGULibraryBE.Repositories;
+using SGULibraryBE.Utilities.ResultHandler;
 
 namespace SGULibraryBE.Services.Implementations
 {
@@ -10,33 +12,46 @@ namespace SGULibraryBE.Services.Implementations
     {
         private readonly IUnitOfWork unitOfWork;
         private IAccountRepository AccountRepository => unitOfWork.AccountRepository;
+        private readonly AccountValidation validation = new();
 
         public AccountService(IUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
         }
 
-        public async Task<AccountResponse> FindById(long id)
+        public async Task<Result<AccountResponse>> FindById(long id)
         {
             var response = await AccountRepository.FindByIdAsync(id);
-            return response.Adapt<AccountResponse>();
+
+            if (response != null)
+                return Result<AccountResponse>.Success(response.Adapt<AccountResponse>());
+            else
+                return Result<AccountResponse>.Failure(Error.NotFound($"Account with id {id} does not exist"));
         }
 
-        public async Task<List<AccountResponse>> GetAll()
+        public async Task<Result<List<AccountResponse>>> GetAll()
         {
             var list = await AccountRepository.GetAllAsync();
             var response = list.Adapt<List<AccountResponse>>();
 
-            return response;
+            return Result<List<AccountResponse>>.Success(response);
         }
 
-        public async Task<AccountResponse> Add(AccountRequest request)
+        public async Task<Result<AccountResponse>> Add(AccountRequest request)
         {
+            if (!validation.Validate(request))
+            {
+                return Result<AccountResponse>.Failure(Error.BadRequest("Failed to add account"));
+            }
+
             var account = request.Adapt<Account>();
             account.IsDeleted = false;
 
             var model = await AccountRepository.AddAsync(account);
-            if (model is null) return null!;
+            if (model is null)
+            {
+                return Result<AccountResponse>.Failure(Error.Failure("Failed to add account"));
+            }
 
             await unitOfWork.SaveChangeAsync();
 
@@ -44,28 +59,45 @@ namespace SGULibraryBE.Services.Implementations
             return response;
         }
 
-        public async Task<bool> Update(long id, AccountRequest request)
+        public async Task<Result> Update(long id, AccountRequest request)
         {
             var model = await AccountRepository.FindByIdAsync(id);
-            if (model is null) return false;
+            if (model is null)
+            {
+                return Result.Failure(Error.Failure($"Account with id {id} does not exist"));
+            }
+
+            if (!validation.Validate(request))
+            {
+                return Result.Failure(Error.BadRequest("Failed to add account"));
+            }
 
             request.Adapt(model);
 
-            var response = AccountRepository.Update(model);
-            await unitOfWork.SaveChangeAsync();
+            if (!AccountRepository.Update(model))
+            {
+                return Result.Failure(Error.Failure($"Failed to update account with id {id}"));
+            }
 
-            return response;
+            await unitOfWork.SaveChangeAsync();
+            return Result.Success();
         }
 
-        public async Task<bool> Delete(long id)
+        public async Task<Result> Delete(long id)
         {
             var model = await AccountRepository.FindByIdAsync(id);
-            if (model is null) return false;
+            if (model is null)
+            {
+                return Result.Failure(Error.Failure($"Account with id {id} does not exist"));
+            }
 
-            var response = AccountRepository.Delete(model);
+            if (!AccountRepository.Delete(model))
+            {
+                return Result.Failure(Error.Failure($"Failed to delete account with id {id}"));
+            }
+
             await unitOfWork.SaveChangeAsync();
-
-            return response;
+            return Result.Success();
         }
     }
 }

@@ -1,22 +1,19 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SGULibraryBE.DTOs.Requests;
-using SGULibraryBE.DTOs.Responses;
 using SGULibraryBE.Services;
 using SGULibraryBE.Utilities;
-using SGULibraryBE.Utilities.ResultHandler;
 
 namespace SGULibraryBE.Controllers
 {
-    [Route("api/accounts")]
+    [Route("api/devices")]
     [ApiController]
-    public class AccountController : ControllerBase
+    public class DeviceController : ControllerBase
     {
-        private readonly IAccountService _service;
+        private readonly IDeviceService _service;
 
-        public AccountController(IAccountService service)
+        public DeviceController(IDeviceService deviceService)
         {
-            _service = service;
+            _service = deviceService;
         }
 
         [HttpGet("{id}")]
@@ -34,14 +31,14 @@ namespace SGULibraryBE.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] AccountRequest request)
+        public async Task<IActionResult> Create([FromBody] DeviceRequest request)
         {
             var response = await _service.Add(request);
             return this.Response(response);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(long id, [FromBody] AccountRequest request)
+        public async Task<IActionResult> Update(long id, [FromBody] DeviceRequest request)
         {
             var response = await _service.Update(id, request);
             return this.Response(response);
