@@ -7,6 +7,8 @@ namespace SGULibraryBE.Models.Commons
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Device> Devices { get; set; }
         public DbSet<BorrowDevice> BorrowDevices { get; set; }
+        public DbSet<Violation> Violations { get; set; }
+        public DbSet<AccountViolation> AccountViolations { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {

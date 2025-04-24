@@ -12,6 +12,7 @@ namespace SGULibraryBE.Services.Implementations
     {
         private readonly IUnitOfWork unitOfWork;
         private IDeviceRepository DeviceRepository => unitOfWork.DeviceRepository;
+        private IBorrowDeviceRepository BorrowDeviceRepository => unitOfWork.BorrowDeviceRepository;
         private readonly DeviceValidation validation = new();
 
         public DeviceService(IUnitOfWork unitOfWork)
@@ -21,18 +22,32 @@ namespace SGULibraryBE.Services.Implementations
 
         public async Task<Result<DeviceResponse>> FindById(long id)
         {
-            var response = await DeviceRepository.FindByIdAsync(id);
+            var model = await DeviceRepository.FindByIdAsync(id);
 
-            if (response != null)
-                return Result<DeviceResponse>.Success(response.Adapt<DeviceResponse>());
-            else
+            if (model == null)
                 return Result<DeviceResponse>.Failure(Error.NotFound($"Device with id {id} does not exist"));
+
+            var response = model.Adapt<DeviceResponse>();
+            var borrowQuantity = await BorrowDeviceRepository.FindByDeviceId(response.Id);
+
+            if (borrowQuantity is null) response.BorrowQuantity = 0;
+            else response.BorrowQuantity = borrowQuantity.Count;
+
+            return Result<DeviceResponse>.Success(response);
         }
 
         public async Task<Result<List<DeviceResponse>>> GetAll()
         {
-            var response = await DeviceRepository.GetAllAsync();
-            return Result<List<DeviceResponse>>.Success(response.Adapt<List<DeviceResponse>>());
+            var list = await DeviceRepository.GetDevicesWithBorrowQuantity();
+            List<DeviceResponse> response = [.. list.Select(pr =>
+            {
+                DeviceResponse deviceResponse = pr.First.Adapt<DeviceResponse>();
+                deviceResponse.BorrowQuantity = pr.Last;
+
+                return deviceResponse;
+            })];
+
+            return Result<List<DeviceResponse>>.Success(response);
         }
 
         public async Task<Result<DeviceResponse>> Add(DeviceRequest request)
@@ -52,7 +67,11 @@ namespace SGULibraryBE.Services.Implementations
             }
 
             await unitOfWork.SaveChangeAsync();
-            return await FindById(response.Id);
+
+            var value = response.Adapt<DeviceResponse>();
+            value.BorrowQuantity = 0;
+
+            return Result<DeviceResponse>.Success(value);
         }
 
         public async Task<Result> Update(long id, DeviceRequest request)

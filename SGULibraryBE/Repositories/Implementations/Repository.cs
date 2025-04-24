@@ -22,6 +22,7 @@ namespace SGULibraryBE.Repositories.Implementations
         public virtual async Task<List<TModel>> GetAllAsync()
         {
             return await _dbSet.IncludeAll(References)
+                               .Where(m => !m.IsDeleted)
                                .ToListAsync();
         }
 

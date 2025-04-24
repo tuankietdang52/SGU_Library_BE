@@ -49,7 +49,7 @@ namespace SGULibraryBE.Utilities.ResultHandler
 
         public static implicit operator Result<T>(Error error) => new(error);
 
-        public static Result<T> Success(T value) => new(value);
+        public static Result<T> Success(T? value) => new(value!);
         public static new Result<T> Failure(Error error) => new(error);
     }
 }

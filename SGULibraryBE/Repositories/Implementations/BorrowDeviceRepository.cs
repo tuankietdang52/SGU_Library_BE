@@ -2,6 +2,7 @@
 using SGULibraryBE.Models;
 using SGULibraryBE.Models.Commons;
 using SGULibraryBE.Utilities;
+using System.Threading.Tasks;
 
 namespace SGULibraryBE.Repositories.Implementations
 {
@@ -13,6 +14,20 @@ namespace SGULibraryBE.Repositories.Implementations
                 item => item.User!,
                 item => item.Device!
             ]);
+        }
+
+        public async Task<List<BorrowDevice>> FindByAccountId(long accountId)
+        {
+            return await _dbSet.IncludeAll(References)
+                                .Where(item => item.UserId == accountId)
+                                .ToListAsync();
+        }
+
+        public async Task<List<BorrowDevice>> FindByDeviceId(long deviceId)
+        {
+            return await _dbSet.IncludeAll(References)
+                               .Where(item => item.DeviceId == deviceId)
+                               .ToListAsync();
         }
 
         public override async Task<BorrowDevice?> FindByIdAsync(long id)

@@ -2,8 +2,8 @@
 
 namespace SGULibraryBE.Repositories
 {
-    public interface IAccountRepository : IRepository<long, Account>
+    public interface IViolationRepository : IRepository<long, Violation>
     {
-        
+
     }
 }

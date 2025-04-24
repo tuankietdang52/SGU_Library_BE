@@ -5,6 +5,8 @@
         IAccountRepository AccountRepository { get; }
         IDeviceRepository DeviceRepository { get; }
         IBorrowDeviceRepository BorrowDeviceRepository { get; }
+        IViolationRepository ViolationRepository { get; }
+        IAccountViolationRepository AccountViolationRepository { get; }
 
         Task SaveChangeAsync();
     }

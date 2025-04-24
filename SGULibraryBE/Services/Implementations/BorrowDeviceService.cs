@@ -68,7 +68,7 @@ namespace SGULibraryBE.Services.Implementations
             }
 
             await unitOfWork.SaveChangeAsync();
-            return await FindById(response.Id);
+            return Result<BorrowDeviceResponse>.Success(response.Adapt<BorrowDeviceResponse>());
         }
 
         public async Task<Result> Update(long id, BorrowDeviceRequest request)

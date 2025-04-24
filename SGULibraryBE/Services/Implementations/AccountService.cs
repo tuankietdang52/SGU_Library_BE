@@ -47,16 +47,14 @@ namespace SGULibraryBE.Services.Implementations
             var account = request.Adapt<Account>();
             account.IsDeleted = false;
 
-            var model = await AccountRepository.AddAsync(account);
-            if (model is null)
+            var response = await AccountRepository.AddAsync(account);
+            if (response is null)
             {
                 return Result<AccountResponse>.Failure(Error.Failure("Failed to add account"));
             }
 
             await unitOfWork.SaveChangeAsync();
-
-            var response = await FindById(model.Id);
-            return response;
+            return Result<AccountResponse>.Success(response.Adapt<AccountResponse>());
         }
 
         public async Task<Result> Update(long id, AccountRequest request)

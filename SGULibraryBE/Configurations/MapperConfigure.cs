@@ -21,6 +21,12 @@ namespace SGULibraryBE.Configurations
                                                                 .IgnoreIf((src, dest) => src.DateReturn == DateTime.MinValue, dest => dest.DateReturn)
                                                                 .IgnoreNullValues(true);
 
+            TypeAdapterConfig<ViolationResquest, Violation>.NewConfig()
+                                                           .IgnoreNullValues(true);
+
+            TypeAdapterConfig<AccountViolationRequest, AccountViolation>.NewConfig()
+                                                                        .IgnoreNullValues(true);
+
             return app;
         }
     }
