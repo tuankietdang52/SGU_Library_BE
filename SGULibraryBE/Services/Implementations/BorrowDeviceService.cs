@@ -38,6 +38,18 @@ namespace SGULibraryBE.Services.Implementations
                 return Result<BorrowDeviceResponse>.Failure(Error.NotFound($"Borrow Device with id {id} does not exist"));
         }
 
+        public async Task<Result<List<BorrowDeviceResponse>>> FindByAccountId(long accountId)
+        {
+            var response = await BorrowDeviceRepository.FindByAccountId(accountId);
+            return Result<List<BorrowDeviceResponse>>.Success(response.Adapt<List<BorrowDeviceResponse>>());
+        }
+
+        public async Task<Result<List<BorrowDeviceResponse>>> FindByDeviceId(long deviceId)
+        {
+            var response = await BorrowDeviceRepository.FindByDeviceId(deviceId);
+            return Result<List<BorrowDeviceResponse>>.Success(response.Adapt<List<BorrowDeviceResponse>>());
+        }
+
         private bool IsAccountAndDeviceExist(long accountId, long deviceId)
         {
             var aResult = AccountRepository.FindByIdAsync(accountId).Result;

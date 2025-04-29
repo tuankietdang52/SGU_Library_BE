@@ -8,6 +8,8 @@ namespace SGULibraryBE.Services
     {
         public Task<Result<List<BorrowDeviceResponse>>> GetAll();
         public Task<Result<BorrowDeviceResponse>> FindById(long id);
+        public Task<Result<List<BorrowDeviceResponse>>> FindByAccountId(long accountId);
+        public Task<Result<List<BorrowDeviceResponse>>> FindByDeviceId(long deviceId);
         public Task<Result<BorrowDeviceResponse>> Add(BorrowDeviceRequest request);
         public Task<Result> Update(long id, BorrowDeviceRequest request);
         public Task<Result> Delete(long id);

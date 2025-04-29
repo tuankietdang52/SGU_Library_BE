@@ -23,6 +23,20 @@ namespace SGULibraryBE.Controllers
             return this.Response(response);
         }
 
+        [HttpGet("account/{id}")]
+        public async Task<IActionResult> FindByAccountId(long id)
+        {
+            var response = await _service.FindByAccountId(id);
+            return this.Response(response);
+        }
+
+        [HttpGet("device/{id}")]
+        public async Task<IActionResult> FindByDeviceId(long id)
+        {
+            var response = await _service.FindByDeviceId(id);
+            return this.Response(response);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {

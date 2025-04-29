@@ -19,8 +19,8 @@ namespace SGULibraryBE.Repositories.Implementations
         public async Task<List<BorrowDevice>> FindByAccountId(long accountId)
         {
             return await _dbSet.IncludeAll(References)
-                                .Where(item => item.UserId == accountId)
-                                .ToListAsync();
+                               .Where(item => item.UserId == accountId)
+                               .ToListAsync();
         }
 
         public async Task<List<BorrowDevice>> FindByDeviceId(long deviceId)
