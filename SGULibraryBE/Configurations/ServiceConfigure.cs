@@ -12,6 +12,20 @@ namespace SGULibraryBE.Configurations
 {
     public static class ServiceConfigure
     {
+        public static IServiceCollection AllowCORS(this IServiceCollection services)
+        {
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder => {
+                    builder.AllowAnyOrigin();
+                    builder.AllowAnyMethod();
+                    builder.AllowAnyHeader();
+                });
+            });
+
+            return services;
+        }
+
         public static IServiceCollection RegisterDbContext(this IServiceCollection services, ConfigurationManager configuration)
         {
             string? connection = configuration.GetConnectionString("MyDb");

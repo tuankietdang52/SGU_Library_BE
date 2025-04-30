@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi()
+                .AllowCORS()
                 .RegisterDbContext(builder.Configuration)
                 .RegisterServices()
                 .RegisterRepositories();
@@ -18,9 +19,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles(); 
+app.UseRouting(); 
+app.UseCors();
+
 app.UseAuthorization();
 app.MapControllers();
 
 app.ConfigureRequestMapper();
-
 app.Run();
