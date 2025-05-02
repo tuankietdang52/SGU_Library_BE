@@ -27,10 +27,28 @@ namespace SGULibraryBE.Repositories.Implementations
             return [.. (await _dbSet.ToListAsync())
                                     .Select(item =>
                                     {
-                                        var count = appDbContext.BorrowDevices.Count(e => e.DeviceId == item.Id && !e.IsDeleted && !e.IsReturn);
-                                        count += appDbContext.Reservations.Count(e => e.DeviceId == item.Id && !e.IsDeleted);
+                                        var count = appDbContext.BorrowDevices.Where(e => e.DeviceId == item.Id && !e.IsDeleted && !e.IsReturn)
+                                                                              .Sum(e => e.Quantity);
+                                        count += appDbContext.Reservations.Where(e => e.DeviceId == item.Id && !e.IsDeleted && !e.IsCheckedOut)
+                                                                          .Sum(e => e.Quantity);
                                         return new Pair<Device, int>(item, count);
                                     })];
+        }
+
+        public async Task<int> GetDeviceBorrowQuantity(long id)
+        {
+            if (_dbContext is not AppDbContext appDbContext)
+                throw new InvalidOperationException("dbContext must be AppDbContext");
+
+            var device = await _dbSet.FirstOrDefaultAsync(item => item.Id == id);
+            if (device is null) return -1;
+
+            var count = appDbContext.BorrowDevices.Where(e => e.DeviceId == device.Id && !e.IsDeleted && !e.IsReturn)
+                                                  .Sum(e => e.Quantity);
+            count += appDbContext.Reservations.Where(e => e.DeviceId == device.Id && !e.IsDeleted && !e.IsCheckedOut)
+                                              .Sum(e => e.Quantity);
+
+            return count;
         }
     }
 }

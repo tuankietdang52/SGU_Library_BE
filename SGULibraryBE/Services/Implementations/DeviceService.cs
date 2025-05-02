@@ -12,8 +12,6 @@ namespace SGULibraryBE.Services.Implementations
     {
         private readonly IUnitOfWork unitOfWork;
         private IDeviceRepository DeviceRepository => unitOfWork.DeviceRepository;
-        private IBorrowDeviceRepository BorrowDeviceRepository => unitOfWork.BorrowDeviceRepository;
-        private IReservationRepository ReservationRepository => unitOfWork.ReservationRepository;
 
         private readonly DeviceValidation validation = new();
 
@@ -30,13 +28,20 @@ namespace SGULibraryBE.Services.Implementations
                 return Result<DeviceResponse>.Failure(Error.NotFound($"Device with id {id} does not exist"));
 
             var response = model.Adapt<DeviceResponse>();
-            var borrowQuantity = await BorrowDeviceRepository.FindByDeviceId(response.Id);
-            var reservationQuantity = await ReservationRepository.FindByDeviceId(response.Id);
+            var borrowQuantity = await DeviceRepository.GetDeviceBorrowQuantity(model.Id);
 
-            if (borrowQuantity is null) response.BorrowQuantity = 0;
-            else response.BorrowQuantity = borrowQuantity.Count + reservationQuantity.Count;
-
+            response.BorrowQuantity = borrowQuantity;
             return Result<DeviceResponse>.Success(response);
+        }
+
+        public async Task<Result<int>> GetDeviceBorrowQuantity(long id)
+        {
+            var borrowQuantity = await DeviceRepository.GetDeviceBorrowQuantity(id);
+
+            if (borrowQuantity == -1)
+                return Result<int>.Failure(Error.NotFound($"Cant found device with Id {id}"));
+
+            return Result<int>.Success(borrowQuantity);
         }
 
         public async Task<Result<List<DeviceResponse>>> GetAll()

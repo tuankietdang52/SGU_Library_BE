@@ -5,6 +5,7 @@ using SGULibraryBE.DTOs.Validation;
 using SGULibraryBE.Models;
 using SGULibraryBE.Repositories;
 using SGULibraryBE.Utilities.ResultHandler;
+using System.Collections.Generic;
 
 namespace SGULibraryBE.Services.Implementations
 {
@@ -23,32 +24,54 @@ namespace SGULibraryBE.Services.Implementations
             _deviceService = deviceService;
         }
 
+        private int GetDeviceBorrowQuantity(long deviceId)
+        {
+            var res = _deviceService.GetDeviceBorrowQuantity(deviceId).Result;
+
+            if (!res.IsSuccess)
+                return -1;
+            else return res.Value;
+        }
+
         public async Task<Result<List<BorrowDeviceResponse>>> GetAll()
         {
-            var response = await BorrowDeviceRepository.GetAllAsync();
-            return Result<List<BorrowDeviceResponse>>.Success(response.Adapt<List<BorrowDeviceResponse>>());
+            var list = await BorrowDeviceRepository.GetAllAsync();
+            var response = list.Adapt<List<BorrowDeviceResponse>>();
+            response.ForEach(item => item.Device!.BorrowQuantity = GetDeviceBorrowQuantity(item.Device.Id));
+
+            return Result<List<BorrowDeviceResponse>>.Success(response);
         }
 
         public async Task<Result<BorrowDeviceResponse>> FindById(long id)
         {
-            var response = await BorrowDeviceRepository.FindByIdAsync(id);
+            var model = await BorrowDeviceRepository.FindByIdAsync(id);
 
-            if (response != null)
-                return Result<BorrowDeviceResponse>.Success(response.Adapt<BorrowDeviceResponse>());
+            if (model != null)
+            {
+                var response = model.Adapt<BorrowDeviceResponse>();
+                response.Device!.BorrowQuantity = GetDeviceBorrowQuantity(id);
+                return Result<BorrowDeviceResponse>.Success(response);
+            }
             else
                 return Result<BorrowDeviceResponse>.Failure(Error.NotFound($"Borrow Device with id {id} does not exist"));
         }
 
         public async Task<Result<List<BorrowDeviceResponse>>> FindByAccountId(long accountId)
         {
-            var response = await BorrowDeviceRepository.FindByAccountId(accountId);
-            return Result<List<BorrowDeviceResponse>>.Success(response.Adapt<List<BorrowDeviceResponse>>());
+            var list = await BorrowDeviceRepository.FindByAccountId(accountId);
+            var response = list.Adapt<List<BorrowDeviceResponse>>();
+            response.ForEach(item => item.Device!.BorrowQuantity = GetDeviceBorrowQuantity(item.Device.Id));
+
+            return Result<List<BorrowDeviceResponse>>.Success(response);
         }
 
         public async Task<Result<List<BorrowDeviceResponse>>> FindByDeviceId(long deviceId)
         {
-            var response = await BorrowDeviceRepository.FindByDeviceId(deviceId);
-            return Result<List<BorrowDeviceResponse>>.Success(response.Adapt<List<BorrowDeviceResponse>>());
+            var list = await BorrowDeviceRepository.FindByDeviceId(deviceId);
+            var response = list.Adapt<List<BorrowDeviceResponse>>();
+            response.ForEach(item => item.Device!.BorrowQuantity = GetDeviceBorrowQuantity(item.Device.Id));
+
+            return Result<List<BorrowDeviceResponse>>.Success(response);
         }
 
         private bool IsAccountAndDeviceExist(long accountId, long deviceId)
@@ -109,7 +132,15 @@ namespace SGULibraryBE.Services.Implementations
             }
 
             await unitOfWork.SaveChangeAsync();
-            return Result<BorrowDeviceResponse>.Success(response.Adapt<BorrowDeviceResponse>());
+
+            int borrowQuantity = GetDeviceBorrowQuantity(response.DeviceId);
+            if (borrowQuantity == -1)
+                return Result<BorrowDeviceResponse>.Failure(Error.Failure("Failed to add borrow device. Cant get borrow quantity"));
+
+            var res = response.Adapt<BorrowDeviceResponse>();
+            res.Device!.BorrowQuantity = borrowQuantity;
+
+            return Result<BorrowDeviceResponse>.Success(res);
         }
 
         public async Task<Result> Update(long id, BorrowDeviceRequest request)

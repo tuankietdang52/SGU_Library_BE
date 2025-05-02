@@ -6,6 +6,7 @@ using SGULibraryBE.Models;
 using SGULibraryBE.Repositories;
 using SGULibraryBE.Repositories.Implementations;
 using SGULibraryBE.Utilities.ResultHandler;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace SGULibraryBE.Services.Implementations
@@ -25,33 +26,54 @@ namespace SGULibraryBE.Services.Implementations
             _deviceService = deviceService;
         }
 
+        private int GetDeviceBorrowQuantity(long deviceId)
+        {
+            var res = _deviceService.GetDeviceBorrowQuantity(deviceId).Result;
+
+            if (!res.IsSuccess)
+                return -1;
+            else return res.Value;
+        }
 
         public async Task<Result<List<ReservationResponse>>> FindByAccountId(long accountId)
         {
-            var response = await ReservationRepository.FindByAccountId(accountId);
-            return Result<List<ReservationResponse>>.Success(response.Adapt<List<ReservationResponse>>());
+            var list = await ReservationRepository.FindByAccountId(accountId);
+            var response = list.Adapt<List<ReservationResponse>>();
+            response.ForEach(item => item.Device!.BorrowQuantity = GetDeviceBorrowQuantity(item.Device.Id));
+
+            return Result<List<ReservationResponse>>.Success(response);
         }
 
         public async Task<Result<List<ReservationResponse>>> FindByDeviceId(long deviceId)
         {
-            var response = await ReservationRepository.FindByDeviceId(deviceId);
-            return Result<List<ReservationResponse>>.Success(response.Adapt<List<ReservationResponse>>());
+            var list = await ReservationRepository.FindByDeviceId(deviceId);
+            var response = list.Adapt<List<ReservationResponse>>();
+            response.ForEach(item => item.Device!.BorrowQuantity = GetDeviceBorrowQuantity(item.Device.Id));
+
+            return Result<List<ReservationResponse>>.Success(response);
         }
 
         public async Task<Result<ReservationResponse>> FindById(long id)
         {
-            var response = await ReservationRepository.FindByIdAsync(id);
+            var model = await ReservationRepository.FindByIdAsync(id);
 
-            if (response != null)
-                return Result<ReservationResponse>.Success(response.Adapt<ReservationResponse>());
+            if (model != null)
+            {
+                var response = model.Adapt<ReservationResponse>();
+                response.Device!.BorrowQuantity = GetDeviceBorrowQuantity(id);
+                return Result<ReservationResponse>.Success(response);
+            }
             else
                 return Result<ReservationResponse>.Failure(Error.NotFound($"Reservation with id {id} does not exist"));
         }
 
         public async Task<Result<List<ReservationResponse>>> GetAll()
         {
-            var response = await ReservationRepository.GetAllAsync();
-            return Result<List<ReservationResponse>>.Success(response.Adapt<List<ReservationResponse>>());
+            var list = await ReservationRepository.GetAllAsync();
+            var response = list.Adapt<List<ReservationResponse>>();
+            response.ForEach(item => item.Device!.BorrowQuantity = GetDeviceBorrowQuantity(item.Device.Id));
+
+            return Result<List<ReservationResponse>>.Success(response);
         }
 
         private bool IsAccountAndDeviceExist(long accountId, long deviceId)
@@ -112,7 +134,15 @@ namespace SGULibraryBE.Services.Implementations
             }
 
             await unitOfWork.SaveChangeAsync();
-            return Result<ReservationResponse>.Success(response.Adapt<ReservationResponse>());
+
+            int borrowQuantity = GetDeviceBorrowQuantity(response.DeviceId);
+            if (borrowQuantity == -1)
+                return Result<ReservationResponse>.Failure(Error.Failure("Failed to add reservation. Cant get borrow quantity"));
+
+            var res = response.Adapt<ReservationResponse>();
+            res.Device!.BorrowQuantity = borrowQuantity;
+
+            return Result<ReservationResponse>.Success(res);
         }
 
         public async Task<Result> Update(long id, ReservationRequest request)
