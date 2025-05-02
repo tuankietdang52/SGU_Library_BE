@@ -6,6 +6,7 @@ using SGULibraryBE.Models;
 using SGULibraryBE.Repositories;
 using SGULibraryBE.Repositories.Implementations;
 using SGULibraryBE.Utilities.ResultHandler;
+using System.Threading.Tasks;
 
 namespace SGULibraryBE.Services.Implementations
 {
@@ -14,13 +15,14 @@ namespace SGULibraryBE.Services.Implementations
         private readonly IUnitOfWork unitOfWork;
         private IReservationRepository ReservationRepository => unitOfWork.ReservationRepository;
         private IAccountRepository AccountRepository => unitOfWork.AccountRepository;
-        private IDeviceRepository DeviceRepository => unitOfWork.DeviceRepository;
+        private readonly IDeviceService _deviceService;
 
         private readonly ReservationValidation validation = new();
 
-        public ReservationService(IUnitOfWork unitOfWork)
+        public ReservationService(IUnitOfWork unitOfWork, IDeviceService deviceService)
         {
             this.unitOfWork = unitOfWork;
+            _deviceService = deviceService;
         }
 
 
@@ -55,21 +57,48 @@ namespace SGULibraryBE.Services.Implementations
         private bool IsAccountAndDeviceExist(long accountId, long deviceId)
         {
             var aResult = AccountRepository.FindByIdAsync(accountId).Result;
-            var dResult = DeviceRepository.FindByIdAsync(deviceId).Result;
+            var dResult = _deviceService.FindById(deviceId).Result;
 
-            return aResult is not null && dResult is not null;
+            return aResult is not null && dResult.IsSuccess;
+        }
+
+        private bool IsEnoughQuantity(long deviceId, int quantity)
+        {
+            var result = _deviceService.FindById(deviceId).Result;
+            if (!result.IsSuccess) return false;
+
+            var device = result.Value;
+            int remain = device.Quantity - device.BorrowQuantity;
+
+            return quantity <= remain;
+        }
+
+        private bool IsEnoughQuantity(long deviceId, int newQuantity, int oldQuantity)
+        {
+            var result = _deviceService.FindById(deviceId).Result;
+            if (!result.IsSuccess) return false;
+
+            var device = result.Value;
+            int remain = device.Quantity - (device.BorrowQuantity - oldQuantity);
+
+            return newQuantity <= remain;
         }
 
         public async Task<Result<ReservationResponse>> Add(ReservationRequest request)
         {
             if (!validation.Validate(request))
             {
-                return Result<ReservationResponse>.Failure(Error.BadRequest("Failed to add reservation"));
+                return Result<ReservationResponse>.Failure(Error.Validation("Failed to add reservation"));
             }
 
             if (!IsAccountAndDeviceExist(request.UserId, request.DeviceId))
             {
                 return Result<ReservationResponse>.Failure(Error.BadRequest("Failed to add reservation. User or Device does not exist"));
+            }
+
+            if (!IsEnoughQuantity(request.DeviceId, request.Quantity))
+            {
+                return Result<ReservationResponse>.Failure(Error.BadRequest("Failed to add reservation. Not enough quantity"));
             }
 
             Reservation model = request.Adapt<Reservation>();
@@ -90,7 +119,7 @@ namespace SGULibraryBE.Services.Implementations
         {
             if (!validation.Validate(request))
             {
-                return Result.Failure(Error.BadRequest("Failed to update reservation"));
+                return Result.Failure(Error.Validation("Failed to update reservation"));
             }
 
             if (!IsAccountAndDeviceExist(request.UserId, request.DeviceId))
@@ -102,6 +131,11 @@ namespace SGULibraryBE.Services.Implementations
             if (model is null)
             {
                 return Result.Failure(Error.NotFound($"Reservation with id {id} does not exist"));
+            }
+
+            if (!IsEnoughQuantity(request.DeviceId, request.Quantity, model.Quantity))
+            {
+                return Result.Failure(Error.BadRequest("Failed to add reservation. Not enough quantity"));
             }
 
             request.Adapt(model);

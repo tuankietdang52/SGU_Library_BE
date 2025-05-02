@@ -13,13 +13,14 @@ namespace SGULibraryBE.Services.Implementations
         private readonly IUnitOfWork unitOfWork;
         private IBorrowDeviceRepository BorrowDeviceRepository => unitOfWork.BorrowDeviceRepository;
         private IAccountRepository AccountRepository => unitOfWork.AccountRepository;
-        private IDeviceRepository DeviceRepository => unitOfWork.DeviceRepository;
+        private readonly IDeviceService _deviceService;
 
         private readonly BorrowDeviceValidation validation = new();
 
-        public BorrowDeviceService(IUnitOfWork unitOfWork)
+        public BorrowDeviceService(IUnitOfWork unitOfWork, IDeviceService deviceService)
         {
             this.unitOfWork = unitOfWork;
+            _deviceService = deviceService;
         }
 
         public async Task<Result<List<BorrowDeviceResponse>>> GetAll()
@@ -53,21 +54,48 @@ namespace SGULibraryBE.Services.Implementations
         private bool IsAccountAndDeviceExist(long accountId, long deviceId)
         {
             var aResult = AccountRepository.FindByIdAsync(accountId).Result;
-            var dResult = DeviceRepository.FindByIdAsync(deviceId).Result;
+            var dResult = _deviceService.FindById(deviceId).Result;
 
-            return aResult is not null && dResult is not null;
+            return aResult is not null && dResult.IsSuccess;
+        }
+
+        private bool IsEnoughQuantity(long deviceId, int quantity)
+        {
+            var result = _deviceService.FindById(deviceId).Result;
+            if (!result.IsSuccess) return false;
+
+            var device = result.Value;
+            int remain = device.Quantity - device.BorrowQuantity;
+
+            return quantity <= remain;
+        }
+
+        private bool IsEnoughQuantity(long deviceId, int newQuantity, int oldQuantity)
+        {
+            var result = _deviceService.FindById(deviceId).Result;
+            if (!result.IsSuccess) return false;
+
+            var device = result.Value;
+            int remain = device.Quantity - (device.BorrowQuantity - oldQuantity);
+
+            return newQuantity <= remain;
         }
 
         public async Task<Result<BorrowDeviceResponse>> Add(BorrowDeviceRequest request)
         {
             if (!validation.Validate(request))
             {
-                return Result<BorrowDeviceResponse>.Failure(Error.BadRequest("Failed to add borrow device"));
+                return Result<BorrowDeviceResponse>.Failure(Error.Validation("Failed to add borrow device"));
             }
 
             if (!IsAccountAndDeviceExist(request.UserId, request.DeviceId))
             {
                 return Result<BorrowDeviceResponse>.Failure(Error.BadRequest("Failed to add borrow device. User or Device does not exist"));
+            }
+
+            if (!IsEnoughQuantity(request.DeviceId, request.Quantity))
+            {
+                return Result<BorrowDeviceResponse>.Failure(Error.BadRequest("Failed to add borrow device. Not enough quantity"));
             }
 
             BorrowDevice model = request.Adapt<BorrowDevice>();
@@ -88,7 +116,7 @@ namespace SGULibraryBE.Services.Implementations
         {
             if (!validation.Validate(request))
             {
-                return Result.Failure(Error.BadRequest("Failed to update borrow device"));
+                return Result.Failure(Error.Validation("Failed to update borrow device"));
             }
 
             if (!IsAccountAndDeviceExist(request.UserId, request.DeviceId))
@@ -100,6 +128,11 @@ namespace SGULibraryBE.Services.Implementations
             if (model is null)
             {
                 return Result.Failure(Error.NotFound($"Borrow Device with id {id} does not exist"));
+            }
+
+            if (!IsEnoughQuantity(request.DeviceId, request.Quantity, model.Quantity))
+            {
+                return Result.Failure(Error.BadRequest("Failed to add borrow device. Not enough quantity"));
             }
 
             request.Adapt(model);

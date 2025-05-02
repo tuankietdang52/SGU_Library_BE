@@ -9,6 +9,7 @@ namespace SGULibraryBE.DTOs.Validation
             if (request.DateCreate == DateTime.MinValue) return false;
             if (request.DateBorrow == DateTime.MinValue) return false;
             if (request.DateReturn == DateTime.MinValue) return false;
+            if (request.Quantity == 0) return false;
 
             return true;
         }

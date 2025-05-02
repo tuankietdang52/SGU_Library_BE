@@ -41,7 +41,7 @@ namespace SGULibraryBE.Services.Implementations
         {
             if (!validation.Validate(request))
             {
-                return Result<AccountResponse>.Failure(Error.BadRequest("Failed to add account"));
+                return Result<AccountResponse>.Failure(Error.Validation("Failed to add account"));
             }
 
             var account = request.Adapt<Account>();
@@ -67,7 +67,7 @@ namespace SGULibraryBE.Services.Implementations
 
             if (!validation.Validate(request))
             {
-                return Result.Failure(Error.BadRequest("Failed to add account"));
+                return Result.Failure(Error.Validation("Failed to add account"));
             }
 
             request.Adapt(model);

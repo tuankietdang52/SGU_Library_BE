@@ -13,6 +13,8 @@ namespace SGULibraryBE.Services.Implementations
         private readonly IUnitOfWork unitOfWork;
         private IDeviceRepository DeviceRepository => unitOfWork.DeviceRepository;
         private IBorrowDeviceRepository BorrowDeviceRepository => unitOfWork.BorrowDeviceRepository;
+        private IReservationRepository ReservationRepository => unitOfWork.ReservationRepository;
+
         private readonly DeviceValidation validation = new();
 
         public DeviceService(IUnitOfWork unitOfWork)
@@ -29,9 +31,10 @@ namespace SGULibraryBE.Services.Implementations
 
             var response = model.Adapt<DeviceResponse>();
             var borrowQuantity = await BorrowDeviceRepository.FindByDeviceId(response.Id);
+            var reservationQuantity = await ReservationRepository.FindByDeviceId(response.Id);
 
             if (borrowQuantity is null) response.BorrowQuantity = 0;
-            else response.BorrowQuantity = borrowQuantity.Count;
+            else response.BorrowQuantity = borrowQuantity.Count + reservationQuantity.Count;
 
             return Result<DeviceResponse>.Success(response);
         }
@@ -54,7 +57,7 @@ namespace SGULibraryBE.Services.Implementations
         {
             if (!validation.Validate(request))
             {
-                return Result<DeviceResponse>.Failure(Error.BadRequest("Failed to add device"));
+                return Result<DeviceResponse>.Failure(Error.Validation("Failed to add device"));
             }
 
             Device device = request.Adapt<Device>();
@@ -78,7 +81,7 @@ namespace SGULibraryBE.Services.Implementations
         {
             if (!validation.Validate(request))
             {
-                return Result.Failure(Error.BadRequest("Failed to add device"));
+                return Result.Failure(Error.Validation("Failed to add device"));
             }
 
             var model = await DeviceRepository.FindByIdAsync(id);

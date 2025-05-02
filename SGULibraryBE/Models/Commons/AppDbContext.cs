@@ -9,6 +9,7 @@ namespace SGULibraryBE.Models.Commons
         public DbSet<BorrowDevice> BorrowDevices { get; set; }
         public DbSet<Violation> Violations { get; set; }
         public DbSet<AccountViolation> AccountViolations { get; set; }
+        public DbSet<Reservation> Reservations { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
