@@ -1,11 +1,11 @@
 ﻿using SGULibraryBE.Models.Commons;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace SGULibraryBE.Models
 {
-    [Table("borrow_devices")]
-    public class BorrowDevice : BaseModel
+    [Table("reservations")]
+    public class Reservation : BaseModel
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -21,8 +21,8 @@ namespace SGULibraryBE.Models
         [Column("date_return")]
         public DateTime DateReturn { get; set; }
 
-        [Column("is_return")]
-        public bool IsReturn { get; set; }
+        [Column("is_checked_out")]
+        public bool IsCheckedOut { get; set; }
 
         [Column("user_id")]
         public long UserId { get; set; }

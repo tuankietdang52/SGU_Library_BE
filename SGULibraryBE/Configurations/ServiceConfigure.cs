@@ -6,7 +6,6 @@ using SGULibraryBE.Repositories;
 using SGULibraryBE.Repositories.Implementations;
 using SGULibraryBE.Services;
 using SGULibraryBE.Services.Implementations;
-using System.Runtime.Intrinsics.X86;
 
 namespace SGULibraryBE.Configurations
 {
@@ -45,6 +44,7 @@ namespace SGULibraryBE.Configurations
             services.AddScoped<IBorrowDeviceService, BorrowDeviceService>();
             services.AddScoped<IViolationService, ViolationService>();
             services.AddScoped<IAccountViolationService, AccountViolationService>();
+            services.AddScoped<IReservationService, ReservationService>();
 
             return services;
         }
@@ -56,6 +56,7 @@ namespace SGULibraryBE.Configurations
             services.AddScoped<IBorrowDeviceRepository, BorrowDeviceRepository>();
             services.AddScoped<IViolationRepository, ViolationRepository>();
             services.AddScoped<IAccountViolationRepository, AccountViolationRepository>();
+            services.AddScoped<IReservationRepository, ReservationRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;

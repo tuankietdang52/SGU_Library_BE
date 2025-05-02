@@ -12,6 +12,7 @@ namespace SGULibraryBE.Repositories.Implementations
         public IBorrowDeviceRepository BorrowDeviceRepository { get; }
         public IViolationRepository ViolationRepository { get; }
         public IAccountViolationRepository AccountViolationRepository { get; }
+        public IReservationRepository ReservationRepository { get; }
 
         public UnitOfWork(
             AppDbContext dbContext,
@@ -19,7 +20,8 @@ namespace SGULibraryBE.Repositories.Implementations
             IDeviceRepository deviceRepository,
             IBorrowDeviceRepository borrowDeviceRepository,
             IViolationRepository violationRepository,
-            IAccountViolationRepository accountViolationRepository)
+            IAccountViolationRepository accountViolationRepository,
+            IReservationRepository reservationRepository)
         {
             _dbContext = dbContext;
             AccountRepository = accountRepository;
@@ -27,6 +29,7 @@ namespace SGULibraryBE.Repositories.Implementations
             BorrowDeviceRepository = borrowDeviceRepository;
             ViolationRepository = violationRepository;
             AccountViolationRepository = accountViolationRepository;
+            ReservationRepository = reservationRepository;
         }
 
         public async Task SaveChangeAsync()

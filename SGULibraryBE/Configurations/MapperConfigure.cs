@@ -27,6 +27,12 @@ namespace SGULibraryBE.Configurations
             TypeAdapterConfig<AccountViolationRequest, AccountViolation>.NewConfig()
                                                                         .IgnoreNullValues(true);
 
+            TypeAdapterConfig<ReservationRequest, Reservation>.NewConfig()
+                                                              .IgnoreIf((src, dest) => src.DateCreate == DateTime.MinValue, dest => dest.DateCreate)
+                                                              .IgnoreIf((src, dest) => src.DateBorrow == DateTime.MinValue, dest => dest.DateBorrow)
+                                                              .IgnoreIf((src, dest) => src.DateReturn == DateTime.MinValue, dest => dest.DateReturn)
+                                                              .IgnoreNullValues(true);
+
             return app;
         }
     }

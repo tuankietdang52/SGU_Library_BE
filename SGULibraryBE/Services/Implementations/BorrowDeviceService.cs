@@ -72,6 +72,7 @@ namespace SGULibraryBE.Services.Implementations
 
             BorrowDevice model = request.Adapt<BorrowDevice>();
             model.IsDeleted = false;
+            model.IsReturn = false;
 
             var response = await BorrowDeviceRepository.AddAsync(model);
             if (response is null)
@@ -87,12 +88,12 @@ namespace SGULibraryBE.Services.Implementations
         {
             if (!validation.Validate(request))
             {
-                return Result<BorrowDeviceResponse>.Failure(Error.BadRequest("Failed to update borrow device"));
+                return Result.Failure(Error.BadRequest("Failed to update borrow device"));
             }
 
             if (!IsAccountAndDeviceExist(request.UserId, request.DeviceId))
             {
-                return Result<BorrowDeviceResponse>.Failure(Error.BadRequest("Failed to update borrow device. User or Device does not exist"));
+                return Result.Failure(Error.BadRequest("Failed to update borrow device. User or Device does not exist"));
             }
 
             var model = await BorrowDeviceRepository.FindByIdAsync(id);
