@@ -1,4 +1,5 @@
-﻿using SGULibraryBE.Models.Commons;
+﻿using Mapster;
+using SGULibraryBE.Models.Commons;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -17,7 +18,19 @@ namespace SGULibraryBE.Models
         [Column("mssv")]
         public long UserId { get; set; }
         public Account? User { get; set; }
-        public AccountViolationStatus Status { get; set; }
+
+        [AdaptIgnore]
+        public string? Status { get; set; }
+
+        [NotMapped]
+        public AccountViolationStatus EStatus
+        {
+            get => Enum.Parse<AccountViolationStatus>(Status!);
+            set
+            {
+                Status = value.ToString();
+            }
+        }
 
         [Column("ban_expired")]
         public DateTime BanExpired { get; set; }
