@@ -18,7 +18,7 @@ namespace SGULibraryBE.Repositories.Implementations
         public override async Task<Account?> FindByIdAsync(long id)
         {
             return await _dbSet.IncludeAll(References)
-                               .FirstOrDefaultAsync(item => item.Id == id);
+                               .FirstOrDefaultAsync(item => item.StudentCode == id);
         }
     }
 }

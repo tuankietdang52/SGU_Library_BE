@@ -8,6 +8,9 @@ namespace SGULibraryBE.DTOs.Responses
     {
         public long Id { get; set; }
         public DateTime DateCreate { get; set; }
+        public AccountViolationStatus Status { get; set; }
+        public DateTime BanExpired { get; set; }
+        public long Compensation { get; set; }
         public AccountResponse? User { get; set; }
         public ViolationResponse? Violation { get; set; }
     }

@@ -9,7 +9,7 @@ namespace SGULibraryBE.Configurations
         {
             base.Configure(builder);
 
-            builder.HasKey(u => u.Id);
+            builder.HasKey(u => u.StudentCode);
 
             builder.HasOne(u => u.Role)
                    .WithMany()

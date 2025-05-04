@@ -17,9 +17,20 @@ namespace SGULibraryBE.Models
         [Column("user_id")]
         public long UserId { get; set; }
         public Account? User { get; set; }
+        public AccountViolationStatus Status { get; set; }
+
+        [Column("ban_expired")]
+        public DateTime BanExpired { get; set; }
+        public long Compensation { get; set; }
 
         [Column("violation_id")]
         public long ViolationId { get; set; }
         public Violation? Violation { get; set; }
+    }
+
+    public enum AccountViolationStatus
+    {
+        Handled,
+        BeingProcessed
     }
 }

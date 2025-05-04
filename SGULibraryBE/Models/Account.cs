@@ -8,8 +8,9 @@ namespace SGULibraryBE.Models
     public class Account : BaseModel
     {
         [Key]
+        [Column("mssv")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; }
+        public long StudentCode { get; set; }
 
         [Column("first_name")]
         public string? FirstName { get; set; }
@@ -17,8 +18,9 @@ namespace SGULibraryBE.Models
         public string? LastName { get; set; }
         public string? Phone { get; set; }
         public string? Email { get; set; }
-        public string? Username { get; set; }
         public string? Password { get; set; }
+        public string? Faculty { get; set; }
+        public string? Major { get; set; }
 
         [Column("avt")]
         public string? Avatar { get; set; }

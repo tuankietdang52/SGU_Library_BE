@@ -6,6 +6,8 @@ namespace SGULibraryBE.DTOs.Validation
     {
         public bool Validate(AccountRequest request)
         {
+            if (request.StudentCode is null) return false;
+
             if (string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.LastName))
             {
                 return false;
@@ -16,7 +18,7 @@ namespace SGULibraryBE.DTOs.Validation
                 return false;
             }
 
-            if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
+            if (string.IsNullOrWhiteSpace(request.Password))
             {
                 return false;
             }

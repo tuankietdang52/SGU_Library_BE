@@ -18,8 +18,11 @@ namespace SGULibraryBE.Models
         [Column("date_borrow")]
         public DateTime DateBorrow { get; set; }
 
+        [Column("date_return_expected")]
+        public DateTime DateReturnExpected { get; set; }
+
         [Column("date_return")]
-        public DateTime DateReturn { get; set; }
+        public DateTime? DateReturn { get; set; }
 
         [Column("is_return")]
         public bool IsReturn { get; set; }
