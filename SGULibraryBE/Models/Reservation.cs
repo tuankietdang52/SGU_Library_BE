@@ -24,7 +24,7 @@ namespace SGULibraryBE.Models
         [Column("is_checked_out")]
         public bool IsCheckedOut { get; set; }
 
-        [Column("user_id")]
+        [Column("mssv")]
         public long UserId { get; set; }
         public Account? User { get; set; }
 

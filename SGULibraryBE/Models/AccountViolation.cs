@@ -14,7 +14,7 @@ namespace SGULibraryBE.Models
         [Column("create_at")]
         public DateTime DateCreate { get; set; }
 
-        [Column("user_id")]
+        [Column("mssv")]
         public long UserId { get; set; }
         public Account? User { get; set; }
         public AccountViolationStatus Status { get; set; }

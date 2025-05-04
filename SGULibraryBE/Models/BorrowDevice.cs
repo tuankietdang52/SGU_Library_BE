@@ -27,7 +27,7 @@ namespace SGULibraryBE.Models
         [Column("is_return")]
         public bool IsReturn { get; set; }
 
-        [Column("user_id")]
+        [Column("mssv")]
         public long UserId { get; set; }
         public Account? User { get; set; }
 
