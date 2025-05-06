@@ -1,9 +1,12 @@
 ﻿using Mapster;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using SGULibraryBE.DTOs.Requests;
 using SGULibraryBE.DTOs.Responses;
 using SGULibraryBE.DTOs.Validation;
 using SGULibraryBE.Models;
 using SGULibraryBE.Repositories;
+using SGULibraryBE.Utilities;
 using SGULibraryBE.Utilities.ResultHandler;
 
 namespace SGULibraryBE.Services.Implementations
@@ -96,6 +99,48 @@ namespace SGULibraryBE.Services.Implementations
 
             await unitOfWork.SaveChangeAsync();
             return Result.Success();
+        }
+
+        public async Task<Result<string>> SendMail(string email)
+        {
+            var account = await AccountRepository.FindByEmailAsync(email);
+            if (account == null)
+            {
+                return Result<string>.Failure(Error.Failure($"Account with email {email} does not exist"));
+            }
+
+            string code = MailUtil.generateCodeOTP();
+            DateTime expired = DateTime.Now.AddMinutes(5);
+            MailUtil.SendEmail(email, "OTP Code", $"Your OTP code is: {code}. It will expire at {expired}");
+            account.OTPCode = code;
+            account.OTPExpired = expired;
+
+            if (!AccountRepository.Update(account))
+            {
+                return Result<string>.Failure(Error.Failure($"Failed to update account with email {email}"));
+            }
+
+            await unitOfWork.SaveChangeAsync();
+            return Result<string>.Success(code);
+        }
+
+        public async Task<Result<string>> VerifyOtp(string email, string otp)
+        {
+            var account = await AccountRepository.FindByEmailAsync(email);
+            if (account == null)
+            {
+                return Result<string>.Failure(Error.Failure($"Account with email {email} does not exist"));
+            }
+            string code = account.OTPCode;
+            DateTime expired = (DateTime)account.OTPExpired;
+            
+            if (!code.Equals(otp) || MailUtil.isExpired(expired))
+            {
+                return Result<string>.Failure(Error.Failure($"OTP code is invalid or expired"));
+            }
+
+            return Result<string>.Success("Verify success");
+
         }
     }
 }

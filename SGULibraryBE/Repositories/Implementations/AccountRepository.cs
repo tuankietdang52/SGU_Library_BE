@@ -20,5 +20,11 @@ namespace SGULibraryBE.Repositories.Implementations
             return await _dbSet.IncludeAll(References)
                                .FirstOrDefaultAsync(item => item.StudentCode == id);
         }
+
+        public async Task<Account?> FindByEmailAsync(string email)
+        {
+            return await _dbSet.IncludeAll(References)
+                               .FirstOrDefaultAsync(item => item.Email == email);
+        }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SGULibraryBE.DTOs.Requests;
 using SGULibraryBE.DTOs.Responses;
 using SGULibraryBE.Services;
+using SGULibraryBE.Services.Implementations;
 using SGULibraryBE.Utilities;
 using SGULibraryBE.Utilities.ResultHandler;
 
@@ -24,6 +25,34 @@ namespace SGULibraryBE.Controllers
         {
             var response = await _service.FindById(id);
             return this.Response(response);
+        }
+
+        [HttpGet("send")]
+        public async Task<IActionResult> Send([FromQuery] string email)
+        {
+
+            var result = await _service.SendMail(email);
+
+            if (result.IsSuccess)
+            {
+                return Ok(result.Value);
+            }
+            return BadRequest(result.Error);
+
+        }
+        [HttpGet("verify")]
+        public async Task<IActionResult> Send([FromQuery] string email,
+                                                [FromQuery] string otp)
+        {
+
+            var result = await _service.VerifyOtp(email, otp);
+
+            if (result.IsSuccess)
+            {
+                return Ok(result.Value);
+            }
+            return BadRequest(result.Error);
+
         }
 
         [HttpGet]

@@ -21,6 +21,10 @@ namespace SGULibraryBE.Models
         public string? Password { get; set; }
         public string? Faculty { get; set; }
         public string? Major { get; set; }
+        [Column("otp_code")]
+        public string? OTPCode { get; set; }
+        [Column("expired_code")]
+        public DateTime? OTPExpired { get; set; }
 
         [Column("avt")]
         public string? Avatar { get; set; }
